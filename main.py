@@ -58,14 +58,6 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-@app.get("/")
-def welcome():
-    return {
-        "message": "Welcome to the Soldering Assistant API!",
-        "documentation": "Go to /docs to view the interactive API documentation.",
-        "status": "Online"
-    }
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
