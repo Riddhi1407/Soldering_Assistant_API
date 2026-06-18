@@ -147,6 +147,37 @@ def get_next(request: Request, project_id: str, db: Session = Depends(get_db), a
         }
     }
 
+@app.get("/projects/{project_id}/components")
+@limiter.limit("60/minute")
+def get_all_components(request: Request, project_id: str, db: Session = Depends(get_db), api_key: str = Depends(verify_api_key)):
+    project = db.query(DBProject).filter(DBProject.id == project_id).first()
+    if not project:
+         raise HTTPException(status_code=404, detail="Project not found")
+    
+    components = db.query(DBComponent).filter(DBComponent.project_id == project_id).all()
+    
+    comp_list = []
+    soldered_count = 0
+    for c in components:
+        comp_list.append({
+            "designator": c.designator,
+            "value": c.value,
+            "description": c.description,
+            "is_soldered": c.is_soldered
+        })
+        if c.is_soldered:
+            soldered_count += 1
+            
+    progress = (soldered_count / len(components) * 100) if components else 0
+
+    return {
+        "Project Name": project.name,
+        "Project ID": project_id,
+        "Progress Percentage": round(progress, 2),
+        "Total Components": len(components),
+        "Components": comp_list
+    }
+
 @app.patch("/projects/{project_id}/components/{designator}/done")
 @limiter.limit("100/minute")
 def mark_done(request: Request, project_id: str, designator: str, db: Session = Depends(get_db), api_key: str = Depends(verify_api_key)):
