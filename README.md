@@ -21,18 +21,17 @@ The Soldering Assistant API helps the user when soldering a project by providing
 - Let's you handle the soldering iron, while taking care of the component details.
 
 ## Tech Stack
-**Language:** Python
-**Framework:** FastAPI
-**Database:** SQLite & SQLAlchemy
-**Server:** Uvicorn
+**Language:** Python\
+**Framework:** FastAPI\
+**Database:** SQLite & SQLAlchemy\
+**Server:** Uvicorn\
 **Rate Limiting:** SlowAPI
 
 ## Installation & Usage
-Clone the repository: https://github.com/Riddhi1407/Soldering_Assistant_API
-Install the dependencies: pip install fastapi uvicorn sqlalchemy slowapi pydantic
+Clone the repository: https://github.com/Riddhi1407/Soldering_Assistant_API \
+Install the dependencies: pip install fastapi uvicorn sqlalchemy slowapi pydantic\
 Start the development server: uvicorn main:app --reload
 
 ## API Key
-This API requires for all the reqests. The API key is hardcoded in the main.py file by default.
-To authorize requests you must include the following header in your requests: X-API-Key: Pass@123
-
+This API requires for all the reqests. The API key is hardcoded in the main.py file by default.\
+To authorize requests you must include the following header in your requests: **X-API-Key: Pass@123**
