@@ -139,35 +139,40 @@ def get_next(request: Request, project_id: str, db: Session = Depends(get_db), a
         }
     }
 
-@app.get("/projects/{project_id}/components")
+@app.get("/projects/{project_id}/next-group")
 @limiter.limit("60/minute")
-def get_all_components(request: Request, project_id: str, db: Session = Depends(get_db), api_key: str = Depends(verify_api_key)):
+def get_next_group(request: Request, project_id: str, db: Session = Depends(get_db), api_key: str = Depends(verify_api_key)):
     project = db.query(DBProject).filter(DBProject.id == project_id).first()
     if not project:
          raise HTTPException(status_code=404, detail="Project not found")
     
-    components = db.query(DBComponent).filter(DBComponent.project_id == project_id).all()
+    next_comp = db.query(DBComponent).filter(
+        DBComponent.project_id == project_id, 
+        DBComponent.is_soldered == False
+    ).first()
+
+    if not next_comp:
+        return {"message": "The Soldering is Complete", "Percentage": 100}
+
+    matching_components = db.query(DBComponent).filter(
+        DBComponent.project_id == project_id,
+        DBComponent.is_soldered == False,
+        DBComponent.value == next_comp.value,
+        DBComponent.description == next_comp.description
+    ).all()
     
-    comp_list = []
-    soldered_count = 0
-    for c in components:
-        comp_list.append({
-            "designator": c.designator,
-            "value": c.value,
-            "description": c.description,
-            "is_soldered": c.is_soldered
-        })
-        if c.is_soldered:
-            soldered_count += 1
-            
-    progress = (soldered_count / len(components) * 100) if components else 0
+    designators = [c.designator for c in matching_components]
 
     return {
         "Project Name": project.name,
         "Project ID": project_id,
-        "Progress Percentage": round(progress, 2),
-        "Total Components": len(components),
-        "Components": comp_list
+        "Status": "Under Process",
+        "Group Details": {
+            "value": next_comp.value,
+            "description": next_comp.description,
+            "count": len(designators)
+        },
+        "Components to Solder": designators
     }
 
 @app.patch("/projects/{project_id}/components/{designator}/done")
